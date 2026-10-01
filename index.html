@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d5c57">
+<title>Tests del Temario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+/* Layout: una columna de estudio (máx. 860px) con pestañas arriba; el test ocupa la pantalla con su hoja de respuestas debajo. */
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --sunk:#e8ece8; --ink:#1b2829; --muted:#5a6a69; --line:#d3dad6;
+  --accent:#0d5c57; --accent-ink:#ffffff; --accent-soft:#d9ebe8;
+  --mark:#f3e24a; --on-mark:#1b2829;
+  --ok:#2c7a40; --ok-soft:#dcefe0; --bad:#b1352c; --bad-soft:#f7e0dd; --blank:#8a8f86;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111817; --surface:#192221; --sunk:#0d1312; --ink:#e3ebe8; --muted:#97a7a4; --line:#2b3836;
+  --accent:#5ec3b8; --accent-ink:#0b1514; --accent-soft:#1d3a37;
+  --mark:#e6d544; --on-mark:#1b2829;
+  --ok:#6fc786; --ok-soft:#1c3324; --bad:#f07c71; --bad-soft:#3a1f1c; --blank:#7d8580;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#111817; --surface:#192221; --sunk:#0d1312; --ink:#e3ebe8; --muted:#97a7a4; --line:#2b3836;
+  --accent:#5ec3b8; --accent-ink:#0b1514; --accent-soft:#1d3a37;
+  --mark:#e6d544; --on-mark:#1b2829;
+  --ok:#6fc786; --ok-soft:#1c3324; --bad:#f07c71; --bad-soft:#3a1f1c; --blank:#7d8580;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.app{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:18px 64px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:2rem;font-weight:800;letter-spacing:-.01em}
+h2.sub{font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:8px;margin-top:8px}
+p{margin:0}
+.muted{color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{width:100%;min-height:140px;resize:vertical}
+
+/* Cabecera */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.25rem;letter-spacing:-.01em;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+#opoBox{font-family:var(--f-body);font-weight:700;font-size:.95rem;color:var(--accent)}
+#opoBox select{font-weight:700;color:var(--accent);padding:3px 8px}
+.hl{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 90%,transparent 90%);padding:0 .1em;color:inherit}
+nav#tabs{display:flex;gap:2px;background:var(--sunk);padding:3px;border-radius:999px;flex-wrap:wrap}
+nav#tabs button{border:0;background:transparent;padding:6px 14px;border-radius:999px;font-weight:700;font-size:.92rem;color:var(--muted)}
+nav#tabs button[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+nav#tabs .badge{font-family:var(--f-mono);font-size:.72rem;background:var(--bad);color:var(--surface);border-radius:999px;padding:1px 6px;margin-left:4px}
+
+.stack{display:flex;flex-direction:column;gap:18px}
+.intro{display:flex;flex-direction:column;gap:6px}
+.intro p{color:var(--muted);max-width:62ch}
+.note{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 14px;font-size:.95rem}
+.note.warn{border-color:var(--bad);background:var(--bad-soft)}
+
+/* Botones */
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 16px;font-weight:700}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.btn.sm{padding:5px 11px;font-size:.88rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{border:0;background:none;padding:0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* Subida */
+.drop{border:2px dashed var(--line);border-radius:var(--r);background:var(--surface);padding:26px 18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop small{color:var(--muted)}
+.uploads{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.92rem}
+.uploads li{display:flex;gap:8px;align-items:baseline;min-width:0}
+.uploads .fn{font-weight:700;overflow-wrap:anywhere}
+.uploads .st{color:var(--muted)}
+.uploads .ok .st{color:var(--ok)}
+.uploads .bad .st{color:var(--bad)}
+details.paste{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+details.paste summary{cursor:pointer;font-weight:700}
+.pastegrid{display:grid;grid-template-columns:90px 1fr;gap:10px;margin:12px 0}
+@media (max-width:480px){.pastegrid{grid-template-columns:1fr}}
+.count{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-weight:500}
+
+/* Lista de temas */
+.temas{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.tema{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+.num{font-family:var(--f-mono);font-weight:700;font-size:1.05rem;color:var(--accent);text-align:center;border:1.5px solid var(--accent);border-radius:8px;padding:4px 0;font-variant-numeric:tabular-nums}
+.tinfo{min-width:0}
+.ttl{font-weight:700;overflow-wrap:anywhere}
+.meta{font-size:.85rem;color:var(--muted)}
+.epi{font-size:.88rem;line-height:1.45;margin:2px 0 4px;max-width:70ch}
+.tact{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.edit{display:grid;grid-template-columns:70px 1fr;gap:8px;grid-column:2/4}
+@media (max-width:520px){.tema{grid-template-columns:44px 1fr}.tact{grid-column:2;justify-content:flex-start}.edit{grid-column:1/3}}
+.empty{border:1px solid var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;background:var(--surface);color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-family:var(--f-display);font-size:1.1rem;margin-bottom:4px}
+
+/* Nuevo test */
+.cfg{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:720px){.cfg{grid-template-columns:1fr}}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{font-family:var(--f-display);font-weight:700;font-size:1rem;margin-bottom:8px;padding:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.chk{display:grid;grid-template-columns:auto 40px 1fr;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.chk:last-child{border-bottom:0}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.chk .n{font-family:var(--f-mono);font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.chk .t{min-width:0;overflow-wrap:anywhere}
+.selbar{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:.9rem}
+.opt{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.opt .lbl{font-weight:700;font-size:.92rem}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.seg span{display:block;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:.92rem;background:var(--surface)}
+.seg input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.hint{font-size:.84rem;color:var(--muted)}
+.summary{font-size:.95rem;margin:4px 0 12px}
+
+/* Generando */
+.gen{display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding-top:30px}
+.pbar{width:100%;height:10px;background:var(--sunk);border-radius:999px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .4s}
+.big{font-family:var(--f-mono);font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.pulse{animation:pulse 1.6s ease-in-out infinite}}
+@keyframes pulse{50%{opacity:.45}}
+
+/* Test */
+.testbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tprog{display:flex;flex-direction:column;gap:5px;min-width:0}
+.tprog .lbl{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+.qmeta{font-size:.85rem;color:var(--muted);font-weight:700;letter-spacing:.03em;text-transform:uppercase;margin-bottom:8px}
+.qtext{font-family:var(--f-body);font-size:1.22rem;font-weight:700;line-height:1.45;margin-bottom:16px}
+.ops{display:flex;flex-direction:column;gap:8px}
+.op{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r);padding:11px 12px;line-height:1.45}
+.op:hover:not(:disabled){border-color:var(--accent)}
+.op .letter{font-family:var(--f-mono);font-weight:700;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--muted);display:grid;place-items:center;font-size:.9rem;color:var(--muted)}
+.op.sel{border-color:var(--accent);background:var(--accent-soft)}
+.op.sel .letter{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.op.right{border-color:var(--ok);background:var(--ok-soft)}
+.op.right .letter{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.op.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.op.wrong .letter{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.op:disabled{cursor:default}
+.fb{margin-top:14px;border-left:4px solid var(--ok);background:var(--surface);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.fb.no{border-left-color:var(--bad)}
+.fb .v{font-weight:700}
+.fb.ok .v{color:var(--ok)}
+.fb.no .v{color:var(--bad)}
+.cita{font-size:.92rem;color:var(--muted);font-style:italic}
+.cita::before{content:"Según el tema: ";font-style:normal;font-weight:700}
+.qnav{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-top:18px}
+.qnav .r{display:flex;gap:8px;flex-wrap:wrap}
+.plantilla{margin-top:28px}
+.plantilla h3{font-size:.95rem;margin-bottom:8px}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:5px}
+.cell{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 0;font-family:var(--f-mono);font-size:.78rem;display:flex;flex-direction:column;align-items:center;line-height:1.2;font-variant-numeric:tabular-nums}
+.cell b{font-size:.9rem}
+.cell.done{background:var(--accent-soft);border-color:var(--accent)}
+.cell.ok{background:var(--ok-soft);border-color:var(--ok)}
+.cell.no{background:var(--bad-soft);border-color:var(--bad)}
+.cell.cur{outline:2px solid var(--ink);outline-offset:1px}
+.confirm{margin-top:16px;border:1.5px solid var(--ink);border-radius:var(--r);padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px}
+.keys{font-size:.8rem;color:var(--muted);margin-top:10px}
+kbd{font-family:var(--f-mono);font-size:.75rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--surface)}
+
+/* Resultado */
+.score{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;padding:18px 0 8px}
+@media (max-width:560px){.score{grid-template-columns:1fr;gap:12px}}
+.nota{font-family:var(--f-display);font-weight:800;font-size:4.6rem;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.nota small{font-size:1.4rem;color:var(--muted);font-weight:700;margin-left:4px}
+.nota .lab{display:block;font-family:var(--f-body);font-size:.85rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.tally{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tally div{border-top:3px solid var(--line);padding-top:6px}
+.tally .a{border-color:var(--ok)}.tally .f{border-color:var(--bad)}.tally .b{border-color:var(--blank)}
+.tally b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.tally span{font-size:.85rem;color:var(--muted)}
+.formula{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.meter{height:8px;background:var(--sunk);border-radius:999px;overflow:hidden;min-width:70px}
+.meter i{display:block;height:100%;background:var(--accent)}
+.review{display:flex;flex-direction:column;gap:12px}
+.rq{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px}
+.rq .head{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.rq .qt{font-weight:700}
+.rq ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.rq li{display:grid;grid-template-columns:24px 1fr;gap:6px;padding:3px 6px;border-radius:6px}
+.rq li.c{background:var(--ok-soft)}
+.rq li.w{background:var(--bad-soft)}
+.rq li .l{font-family:var(--f-mono);font-weight:700}
+.pill{font-family:var(--f-mono);font-size:.78rem;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.pill.bl{background:var(--sunk);color:var(--muted)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Historial */
+.hist{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.hist li button{width:100%;display:grid;grid-template-columns:92px 1fr auto;gap:12px;align-items:center;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:11px 2px}
+.hist li button:hover{background:var(--surface)}
+.hist .d{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.hist .w{min-width:0;font-size:.92rem;overflow-wrap:anywhere}
+.hist .w small{display:block;color:var(--muted)}
+.hn{font-family:var(--f-display);font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums}
+.hn.ok{color:var(--ok)}.hn.no{color:var(--bad)}
+.spark{width:100%;height:auto;display:block}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.stats b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stats span{font-size:.85rem;color:var(--muted)}
+@media (max-width:480px){.stats{grid-template-columns:1fr 1fr}.hist li button{grid-template-columns:70px 1fr auto}}
+.sync{font-family:var(--f-body);font-size:.78rem;font-weight:700;color:var(--muted);display:inline-flex;align-items:center;gap:5px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--blank);display:inline-block}
+.sync.on i{background:var(--ok)}
+.sync.err i{background:var(--bad)}
+.avail{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="hl">Tests</span> del temario <span id="opoBox"></span></div>
+    <nav id="tabs" aria-label="Secciones">
+      <button data-act="tab" data-view="temario">Temario</button>
+      <button data-act="tab" data-view="nuevo">Nuevo test</button>
+      <button data-act="tab" data-view="repaso">Repaso<span class="badge" id="fallBadge" hidden></span></button>
+      <button data-act="tab" data-view="historial">Historial</button>
+    </nav>
+  </header>
+  <main id="main"><p class="muted">Cargando…</p></main>
+  <p class="hint" style="margin-top:40px"><span class="sync" id="sync"><i></i><span>Progreso guardado en este dispositivo</span></span></p>
+</div>
+<script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+const CFG = Object.assign({supabaseUrl:"", supabaseKey:"", perfil:"principal"}, window.TT_CONFIG || {});
+const LETTERS = "abcd";
+const PENALES = [{v:0,l:"Nada"},{v:0.25,l:"1/4 de acierto"},{v:1/3,l:"1/3 de acierto"}];
+const DIFS = {todas:"Todas", b:"Básica", m:"Media", d:"Difícil"};
+const DIFNOM = {b:"básica", m:"media", d:"difícil"};
+const KEY = "tt.progreso." + CFG.perfil;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = (x,d=2) => Number(x).toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+const LS = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const penalLabel = p => p===0 ? "sin penalización" : (Math.abs(p-0.25)<0.01 ? "cada fallo resta 1/4" : "cada fallo resta 1/3");
+const penalFrac = p => p===0 ? "0" : (Math.abs(p-0.25)<0.01 ? "1/4" : "1/3");
+const fecha = ms => new Date(ms).toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"2-digit"});
+const dur = ms => { const m = Math.round(ms/60000); return m < 1 ? "menos de 1 min" : m + " min"; };
+
+let B = null;            // banco de preguntas
+const QI = {};           // pregunta por id
+const S = {
+  opo: LS.get("tt.opo", null), view: LS.get("tt.view", "temario"),
+  form: Object.assign({sel:[], n:20, dif:"todas", penal:1/3, modo:"final"}, LS.get("tt.form", {})),
+  rep: {sel:null, n:20}, test:null, result:null, reviewFilter:"todas", err:null
+};
+if(!["temario","nuevo","repaso","historial"].includes(S.view)) S.view = "temario";
+
+/* ---------- Progreso (este dispositivo + sincronización opcional) ---------- */
+// P = {upd, res:[resultado], st:{idPregunta:{v:vistas, a:aciertos, r:1|0 último, u:timestamp}}}
+let P = LS.get(KEY, null) || {upd:0, res:[], st:{}};
+function merge(a, b){
+  const out = {upd: Math.max(a.upd||0, b.upd||0), res:[], st:{}};
+  const seen = new Map();
+  [...(a.res||[]), ...(b.res||[])].forEach(r => seen.set(r.f, r));
+  out.res = [...seen.values()].sort((x,y) => y.f - x.f);
+  const ids = new Set([...Object.keys(a.st||{}), ...Object.keys(b.st||{})]);
+  ids.forEach(id => { const x = (a.st||{})[id], y = (b.st||{})[id]; out.st[id] = !x ? y : !y ? x : (x.u >= y.u ? x : y); });
+  return out;
+}
+let sb = null, syncState = "local";
+function setSync(state, txt){
+  syncState = state; const el = $("#sync"); if(!el) return;
+  el.className = "sync " + (state === "on" ? "on" : state === "err" ? "err" : "");
+  el.querySelector("span").textContent = txt;
+}
+async function initSync(){
+  if(!CFG.supabaseUrl || !CFG.supabaseKey){ setSync("local", "Progreso guardado solo en este dispositivo"); return; }
+  try{
+    await new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey);
+    await pull();
+  }catch(e){ setSync("err", "Sin conexión con la nube: el progreso se guarda en este dispositivo"); }
+}
+async function pull(){
+  if(!sb) return;
+  const {data, error} = await sb.from("progreso").select("datos").eq("id", CFG.perfil).maybeSingle();
+  if(error) throw error;
+  const remote = data && data.datos ? data.datos : null;
+  const before = JSON.stringify(P);
+  if(remote) P = merge(P, remote);
+  LS.set(KEY, P);
+  if(!remote || JSON.stringify(P) !== JSON.stringify(remote)) await push();
+  setSync("on", "Progreso sincronizado entre dispositivos");
+  if(JSON.stringify(P) !== before && S.view !== "test") render();
+}
+let pushing = Promise.resolve();
+function push(){
+  if(!sb) return Promise.resolve();
+  pushing = pushing.then(async () => {
+    const {error} = await sb.from("progreso").upsert({id: CFG.perfil, datos: P, actualizado: new Date().toISOString()});
+    if(error) setSync("err", "No se pudo subir el progreso. Se guardó en este dispositivo.");
+    else setSync("on", "Progreso sincronizado entre dispositivos");
+  }).catch(() => setSync("err", "No se pudo subir el progreso. Se guardó en este dispositivo."));
+  return pushing;
+}
+function save(){ P.upd = Date.now(); LS.set(KEY, P); push(); }
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && sb && S.view !== "test") pull().catch(() => {}); });
+
+/* ---------- Datos derivados ---------- */
+const temasOpo = () => B.temas.filter(t => t.opo === S.opo).sort((a,b) => a.orden - b.orden);
+const temaById = id => B.temas.find(t => t.id === id);
+const temaName = t => t ? "Tema " + t.numero + " · " + t.titulo : "Tema";
+const pregTema = id => B.preguntas.filter(q => q.t === id);
+const falladas = () => { const ids = new Set(temasOpo().map(t => t.id)); return B.preguntas.filter(q => ids.has(q.t) && P.st[q.id] && P.st[q.id].r === 0); };
+const resOpo = () => { const ids = new Set(temasOpo().map(t => t.id)); return P.res.filter(r => (r.temas||[]).some(id => ids.has(id))); };
+function statsTema(id){
+  let v = 0, a = 0, vistas = 0; const qs = pregTema(id);
+  qs.forEach(q => { const s = P.st[q.id]; if(s){ v += s.v; a += s.a; vistas++; } });
+  return {total: qs.length, vistas, sinVer: qs.length - vistas, pct: v ? a/v*100 : null, resp: v};
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const inTest = S.view === "test";
+  $("#tabs").hidden = inTest;
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.view === S.view ? "page" : "false"));
+  const ob = $("#opoBox");
+  if(B.opos.length > 1) ob.innerHTML = `<select id="opoSel" aria-label="Oposición">${B.opos.map(o => `<option value="${o.id}" ${o.id === S.opo ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}</select>`;
+  else ob.textContent = "· " + B.opos[0].nombre;
+  const nf = falladas().length; const fb = $("#fallBadge"); fb.hidden = !nf; fb.textContent = nf;
+  const V = {temario:vTemario, nuevo:vNuevo, repaso:vRepaso, historial:vHistorial, test:vTest, result:vResult};
+  $("#main").innerHTML = (V[S.view] || vTemario)();
+}
+const notes = () => S.err ? `<div class="note warn">${esc(S.err)} <button class="link" data-act="clear-err">Cerrar</button></div>` : "";
+
+function vTemario(){
+  const rows = temasOpo().map(t => {
+    const s = statsTema(t.id); const nf = falladas().filter(q => q.t === t.id).length;
+    const meta = [s.total + " preguntas", s.sinVer + " sin ver"];
+    if(s.pct !== null) meta.push(Math.round(s.pct) + "% de acierto");
+    if(nf) meta.push(nf + " para repasar");
+    return `<li class="tema"><span class="num">${esc(t.numero)}</span><div class="tinfo"><div class="ttl">${esc(t.titulo)}</div>${t.epigrafe ? `<div class="epi">${esc(t.epigrafe)}</div>` : ""}<div class="meta">${meta.join(" · ")}</div></div><div class="tact"><button class="btn sm" data-act="quick" data-id="${t.id}">Test de este tema</button></div></li>`;
+  }).join("");
+  return `<div class="stack">
+    <section class="intro"><h1>Temario</h1><p>Elige un tema para hacer un test rápido, o ve a «Nuevo test» para mezclar varios temas.</p></section>
+    ${notes()}
+    <h2 class="sub">Temas <span class="count">${temasOpo().length}</span></h2>
+    <ol class="temas">${rows}</ol>
+  </div>`;
+}
+
+function vNuevo(){
+  const f = S.form; const ts = temasOpo();
+  f.sel = f.sel.filter(id => ts.some(t => t.id === id));
+  const seg = (name, items, cur) => `<div class="seg" role="radiogroup">${items.map(([v,l]) => `<label><input type="radio" name="${name}" value="${v}" ${String(cur)===String(v) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
+  return `<div class="stack">
+    <section class="intro"><h1>Nuevo test</h1><p>Primero salen las preguntas que todavía no has visto y las que has fallado.</p></section>
+    ${notes()}
+    <div class="cfg">
+      <fieldset class="panel"><legend>¿De qué temas?</legend>
+        <div class="selbar"><span class="hint" id="selCount">${f.sel.length} de ${ts.length} marcados</span><span class="row"><button class="link" data-act="sel-all">Todos</button><button class="link" data-act="sel-none">Ninguno</button></span></div>
+        ${ts.map(t => { const s = statsTema(t.id); return `<label class="chk"><input type="checkbox" name="tsel" value="${t.id}" ${f.sel.includes(t.id) ? "checked" : ""}><span class="n">${esc(t.numero)}</span><span class="t">${esc(t.titulo)} <span class="avail">${s.sinVer}/${s.total} sin ver</span></span></label>`; }).join("")}
+      </fieldset>
+      <div>
+        <div class="opt"><span class="lbl">Número de preguntas</span>${seg("n", [[10,"10"],[20,"20"],[30,"30"],[50,"50"]], f.n)}</div>
+        <div class="opt"><span class="lbl">Dificultad</span>${seg("dif", Object.entries(DIFS), f.dif)}</div>
+        <div class="opt"><span class="lbl">Corrección</span>${seg("modo", [["final","Al final, como en el examen"],["cada","Después de cada pregunta"]], f.modo)}</div>
+        <div class="opt"><span class="lbl">Cada fallo resta</span>${seg("penal", PENALES.map(p => [p.v, p.l]), f.penal)}<span class="hint">Las preguntas en blanco no restan.</span></div>
+        <p class="summary" id="sum">${summaryText()}</p>
+        <button class="btn primary" data-act="start" id="startBtn" ${f.sel.length ? "" : "disabled"}>Empezar el test</button>
+      </div>
+    </div>
+  </div>`;
+}
+function poolFor(sel, dif){ return B.preguntas.filter(q => sel.includes(q.t) && (dif === "todas" || q.d === dif)); }
+function summaryText(){
+  const f = S.form; const k = f.sel.length;
+  if(!k) return "Marca al menos un tema.";
+  const avail = poolFor(f.sel, f.dif).length; const n = Math.min(f.n, avail);
+  return `${n} preguntas de ${k} ${k===1 ? "tema" : "temas"}${f.dif !== "todas" ? ", dificultad " + DIFNOM[f.dif] : ""}, ${penalLabel(Number(f.penal))}.` + (avail < f.n ? ` Solo hay ${avail} con esos filtros.` : "");
+}
+function updateNuevoBits(){
+  const s = $("#sum"); if(s) s.textContent = summaryText();
+  const c = $("#selCount"); if(c) c.textContent = `${S.form.sel.length} de ${temasOpo().length} marcados`;
+  const b = $("#startBtn"); if(b) b.disabled = !S.form.sel.length || !poolFor(S.form.sel, S.form.dif).length;
+  LS.set("tt.form", S.form);
+}
+
+function vRepaso(){
+  const fall = falladas(); const groups = {};
+  fall.forEach(q => (groups[q.t] ??= []).push(q));
+  const ids = temasOpo().map(t => t.id).filter(id => groups[id]);
+  if(S.rep.sel === null && ids.length) S.rep.sel = ids.slice();
+  const sel = (S.rep.sel || []).filter(id => groups[id]);
+  const avail = sel.reduce((s,id) => s + groups[id].length, 0);
+  const body = !ids.length
+    ? `<div class="empty"><strong>No tienes preguntas pendientes</strong>Cuando falles o dejes en blanco una pregunta, aparecerá aquí para repasarla.</div>`
+    : `<div class="cfg"><fieldset class="panel"><legend>Temas con preguntas pendientes</legend>
+        ${ids.map(id => { const t = temaById(id); return `<label class="chk"><input type="checkbox" name="rsel" value="${id}" ${sel.includes(id) ? "checked" : ""}><span class="n">${esc(t.numero)}</span><span class="t">${esc(t.titulo)} <span class="count">${groups[id].length}</span></span></label>`; }).join("")}
+      </fieldset>
+      <div>
+        <div class="opt"><span class="lbl">Preguntas</span><div class="seg">${[[10,"10"],[20,"20"],[9999,"Todas"]].map(([v,l]) => `<label><input type="radio" name="rn" value="${v}" ${S.rep.n==v ? "checked" : ""}><span>${l}</span></label>`).join("")}</div></div>
+        <p class="summary">${Math.min(avail, S.rep.n)} preguntas, corregidas una a una. Las que aciertes salen de la lista.</p>
+        <button class="btn primary" data-act="rep-start" ${avail ? "" : "disabled"}>Empezar el repaso</button>
+      </div></div>`;
+  return `<div class="stack"><section class="intro"><h1>Repaso de falladas</h1><p>Aquí están las preguntas que fallaste o dejaste en blanco la última vez que te salieron.</p></section>${notes()}${body}</div>`;
+}
+
+function vHistorial(){
+  const R = resOpo();
+  if(!R.length) return `<div class="stack"><section class="intro"><h1>Historial</h1></section>${notes()}<div class="empty"><strong>Aún no has hecho ningún test</strong>Al corregir cada test, la nota y las preguntas quedan guardadas aquí.</div></div>`;
+  const last10 = R.slice(0,10); const media = last10.reduce((s,r) => s + r.nota, 0) / last10.length;
+  const totalQ = R.reduce((s,r) => s + (r.n||0), 0);
+  const tRows = temasOpo().map(t => ({t, s: statsTema(t.id)})).filter(x => x.s.resp);
+  return `<div class="stack">
+    <section class="intro"><h1>Historial</h1></section>
+    ${notes()}
+    <div class="stats"><div><b>${R.length}</b><span>tests hechos</span></div><div><b>${fmt(media)}</b><span>nota media (últimos ${last10.length})</span></div><div><b>${totalQ.toLocaleString("es-ES")}</b><span>preguntas respondidas</span></div></div>
+    ${R.length > 1 ? spark(R.slice(0,20).reverse()) : ""}
+    <h2 class="sub">Acierto por tema</h2>
+    <div class="tbl-wrap"><table><thead><tr><th>Tema</th><th>Vistas</th><th>Acierto</th><th style="width:30%"></th></tr></thead><tbody>
+      ${tRows.map(({t,s}) => `<tr><td>${esc(temaName(t))}</td><td class="n">${s.vistas}/${s.total}</td><td class="n">${Math.round(s.pct)}%</td><td><div class="meter"><i style="width:${s.pct.toFixed(1)}%"></i></div></td></tr>`).join("")}
+    </tbody></table></div>
+    <h2 class="sub">Tests</h2>
+    <ul class="hist">${R.map(r => `<li><button data-act="open-res" data-id="${r.f}"><span class="d">${fecha(r.f)}</span><span class="w">${esc(r.tipo === "repaso" ? "Repaso de falladas" : (r.temas||[]).map(id => "Tema " + (temaById(id)?.numero ?? "?")).join(", "))}<small>${r.a} aciertos · ${r.fa} fallos · ${r.b} en blanco · ${r.n} preguntas</small></span><span class="hn ${r.nota >= 5 ? "ok" : "no"}">${fmt(r.nota)}</span></button></li>`).join("")}</ul>
+  </div>`;
+}
+function spark(rs){
+  const W = 600, H = 150, L = 26, Rr = 10, T = 12, Bm = 22;
+  const x = i => L + (rs.length === 1 ? 0 : i * (W - L - Rr) / (rs.length - 1));
+  const y = v => T + (10 - v) / 10 * (H - T - Bm);
+  const pts = rs.map((r,i) => `${x(i).toFixed(1)},${y(r.nota).toFixed(1)}`).join(" ");
+  const grid = [0,5,10].map(v => `<line x1="${L}" x2="${W-Rr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" ${v===5 ? 'stroke-dasharray="4 4"' : ""}/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="JetBrains Mono, monospace">${v}</text>`).join("");
+  const dots = rs.map((r,i) => `<circle cx="${x(i)}" cy="${y(r.nota)}" r="${i === rs.length-1 ? 5 : 3}" fill="${r.nota >= 5 ? "var(--ok)" : "var(--bad)"}"/>`).join("");
+  return `<figure style="margin:0"><svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolución de la nota">${grid}<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2"/>${dots}<text x="${L}" y="${H-4}" font-size="11" fill="var(--muted)">más antiguo</text><text x="${W-Rr}" y="${H-4}" font-size="11" fill="var(--muted)" text-anchor="end">último</text></svg><figcaption class="hint">Nota de los últimos ${rs.length} tests. La línea discontinua marca el 5.</figcaption></figure>`;
+}
+
+/* ---------- Test ---------- */
+function prepQ(q){
+  const order = shuffle([0,1,2,3]);   // en el banco la correcta es siempre la 0
+  return {id: q.id, t: q.t, p: q.p, o: order.map(k => q.o[k]), correcta: order.indexOf(0), e: q.e, c: q.c, ord: order.join("")};
+}
+function elegir(sel, n, dif){
+  const now = Date.now();
+  const groups = sel.map(id => {
+    const qs = poolFor([id], dif).map(q => {
+      const s = P.st[q.id];
+      const pr = !s ? 0 : s.r === 0 ? 1 : 2 + Math.min(0.99, (now - s.u) < 0 ? 0 : 1 - Math.min(1, (now - s.u) / (60*86400000)));
+      return {q, k: pr + Math.random() * 0.5};
+    }).sort((a,b) => a.k - b.k).map(x => x.q);
+    return qs;
+  });
+  const out = []; let i = 0;
+  const order = shuffle(groups.map((_, k) => k));
+  while(out.length < n && groups.some(g => g.length)){
+    const g = groups[order[i++ % order.length]];
+    if(g.length) out.push(g.shift());
+  }
+  return shuffle(out);
+}
+function startTest(){
+  const f = S.form;
+  const qs = elegir(f.sel, f.n, f.dif);
+  if(!qs.length) return;
+  S.test = {tipo: "nuevo", cfg: {sel: f.sel.slice(), n: f.n, dif: f.dif, modo: f.modo, penal: Number(f.penal)}, preguntas: qs.map(prepQ), resp: Array(qs.length).fill(null), idx: 0, inicio: Date.now(), confirm: null};
+  S.view = "test"; render(); scrollTo(0, 0);
+}
+function startRepaso(){
+  const pool = shuffle(falladas().filter(q => (S.rep.sel || []).includes(q.t))).slice(0, S.rep.n);
+  if(!pool.length) return;
+  S.test = {tipo: "repaso", cfg: {sel: [...new Set(pool.map(q => q.t))], modo: "cada", penal: 0}, preguntas: pool.map(prepQ), resp: Array(pool.length).fill(null), idx: 0, inicio: Date.now(), confirm: null};
+  S.view = "test"; render(); scrollTo(0, 0);
+}
+function vTest(){
+  const t = S.test; const i = t.idx; const q = t.preguntas[i]; const r = t.resp[i];
+  const inmediata = t.cfg.modo === "cada"; const revealed = inmediata && r !== null;
+  const answered = t.resp.filter(x => x !== null && x >= 0).length;
+  const ops = q.o.map((o,k) => {
+    let c = "";
+    if(revealed){ if(k === q.correcta) c = "right"; else if(k === r) c = "wrong"; }
+    else if(r === k) c = "sel";
+    return `<button class="op ${c}" data-act="ans" data-k="${k}" ${revealed ? "disabled" : ""} aria-pressed="${r===k}"><span class="letter">${LETTERS[k]}</span><span>${esc(o)}</span></button>`;
+  }).join("");
+  let fb = "";
+  if(revealed){
+    const ok = r === q.correcta;
+    fb = `<div class="fb ${ok ? "ok" : "no"}" role="status"><span class="v">${ok ? "Correcta." : (r < 0 ? "La respuesta es la " + LETTERS[q.correcta] + ")." : "Incorrecta. Era la " + LETTERS[q.correcta] + ").")}</span><span>${esc(q.e)}</span>${q.c ? `<span class="cita">«${esc(q.c)}»</span>` : ""}</div>`;
+  }
+  const cells = t.preguntas.map((p,k) => {
+    const rk = t.resp[k]; let c = "";
+    if(inmediata && rk !== null) c = rk === p.correcta ? "ok" : "no";
+    else if(rk !== null && rk >= 0) c = "done";
+    return `<button class="cell ${c} ${k===i ? "cur" : ""}" data-act="go" data-k="${k}" aria-label="Pregunta ${k+1}"><b>${k+1}</b>${rk !== null && rk >= 0 ? LETTERS[rk] : "·"}</button>`;
+  }).join("");
+  const last = i === t.preguntas.length - 1;
+  const blanks = t.preguntas.length - answered;
+  const confirm = t.confirm === "finish"
+    ? `<div class="confirm"><strong>${blanks ? `Te quedan ${blanks} sin responder.` : "Has respondido todas."} ¿Corregimos?</strong><div class="row"><button class="btn primary" data-act="finish-yes">Corregir</button><button class="btn" data-act="confirm-no">Seguir con el test</button></div></div>`
+    : t.confirm === "quit"
+    ? `<div class="confirm"><strong>¿Salir sin corregir? Este test no se guardará.</strong><div class="row"><button class="btn danger" data-act="quit-yes">Salir</button><button class="btn" data-act="confirm-no">Seguir con el test</button></div></div>` : "";
+  return `
+  <div class="testbar">
+    <button class="btn sm" data-act="quit">Salir</button>
+    <div class="tprog"><span class="lbl">${t.tipo === "repaso" ? "Repaso · " : ""}Pregunta ${i+1} de ${t.preguntas.length} · ${answered} respondidas</span><div class="pbar"><i style="width:${(answered/t.preguntas.length*100).toFixed(1)}%"></i></div></div>
+    <button class="btn primary sm" data-act="finish">Corregir</button>
+  </div>
+  <article>
+    <div class="qmeta">${esc(temaName(temaById(q.t)))}</div>
+    <h2 class="qtext">${esc(q.p)}</h2>
+    <div class="ops">${ops}</div>
+    ${fb}
+    <div class="qnav">
+      <button class="btn" data-act="prev" ${i === 0 ? "disabled" : ""}>Anterior</button>
+      <div class="r">
+        ${inmediata ? (revealed ? "" : `<button class="btn" data-act="idk">No lo sé</button>`) : (r !== null ? `<button class="btn" data-act="blank">Dejar en blanco</button>` : "")}
+        ${last ? `<button class="btn primary" data-act="finish">Terminar y corregir</button>` : `<button class="btn primary" data-act="next">Siguiente</button>`}
+      </div>
+    </div>
+    ${confirm}
+    <p class="keys">Teclado: <kbd>A</kbd>–<kbd>D</kbd> para responder, <kbd>←</kbd> <kbd>→</kbd> para moverte.</p>
+  </article>
+  <section class="plantilla"><h3>Hoja de respuestas</h3><div class="cells">${cells}</div></section>`;
+}
+
+/* ---------- Corrección ---------- */
+function corregir(){
+  const t = S.test; let a = 0, f = 0, b = 0; const now = Date.now();
+  t.preguntas.forEach((q, i) => {
+    const r = t.resp[i]; const ok = r !== null && r >= 0 && r === q.correcta;
+    if(r === null || r < 0) b++; else if(ok) a++; else f++;
+    const s = P.st[q.id] || {v:0, a:0};
+    P.st[q.id] = {v: s.v + 1, a: s.a + (ok ? 1 : 0), r: ok ? 1 : 0, u: now};
+  });
+  const n = t.preguntas.length;
+  const nota = Math.max(0, (a - f * t.cfg.penal) / n * 10);
+  const res = {f: now, d: now - t.inicio, n, a, fa: f, b, nota, pen: t.cfg.penal, tipo: t.tipo, modo: t.cfg.modo, temas: t.cfg.sel, q: t.preguntas.map((q,i) => [q.id, q.ord, t.resp[i]])};
+  P.res.unshift(res); save();
+  S.lastCfg = t.tipo === "nuevo" ? t.cfg : null;
+  S.result = res; S.reviewFilter = "todas"; S.test = null; S.view = "result"; render(); scrollTo(0, 0);
+}
+function rebuild(r){
+  // reconstruye las preguntas de un resultado guardado a partir del banco
+  return r.q.map(([id, ord, resp]) => {
+    const q = QI[id]; if(!q) return null;
+    const order = String(ord).split("").map(Number);
+    return {id, t: q.t, p: q.p, o: order.map(k => q.o[k]), correcta: order.indexOf(0), e: q.e, c: q.c, resp};
+  }).filter(Boolean);
+}
+function vResult(){
+  const r = S.result; const qs = rebuild(r);
+  const neto = r.a - r.fa * r.pen;
+  const porTema = {};
+  qs.forEach(q => { const p = porTema[q.t] ??= {a:0,f:0,b:0}; const bl = q.resp === null || q.resp < 0; if(bl) p.b++; else if(q.resp === q.correcta) p.a++; else p.f++; });
+  const pt = Object.entries(porTema).sort((x,y) => (temaById(x[0])?.orden ?? 999) - (temaById(y[0])?.orden ?? 999));
+  const list = qs.map((q,i) => ({q,i})).filter(({q}) => S.reviewFilter === "todas" || !(q.resp !== null && q.resp >= 0 && q.resp === q.correcta));
+  return `<div class="stack">
+    <div class="row" style="justify-content:space-between"><span class="hint">${r.fromHist ? "Test del " + fecha(r.f) : "Guardado en el historial"}</span>${r.fromHist ? `<button class="btn sm" data-act="tab" data-view="historial">Volver al historial</button>` : ""}</div>
+    <section class="score">
+      <div class="nota"><span class="lab">Nota</span><span class="hl">${fmt(r.nota)}</span><small>/10</small></div>
+      <div>
+        <div class="tally"><div class="a"><b>${r.a}</b><span>aciertos</span></div><div class="f"><b>${r.fa}</b><span>fallos</span></div><div class="b"><b>${r.b}</b><span>en blanco</span></div></div>
+        <p class="formula">Neto ${r.a} − ${r.fa} × ${penalFrac(r.pen)} = ${fmt(neto)} de ${r.n} · ${dur(r.d||0)}</p>
+      </div>
+    </section>
+    ${pt.length > 1 ? `<div class="tbl-wrap"><table><thead><tr><th>Tema</th><th>Aciertos</th><th>Fallos</th><th>Blanco</th></tr></thead><tbody>${pt.map(([id,p]) => `<tr><td>${esc(temaName(temaById(id)))}</td><td class="n">${p.a}</td><td class="n">${p.f}</td><td class="n">${p.b}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <div class="row">
+      ${!r.fromHist && S.lastCfg ? `<button class="btn primary" data-act="again">Otro test de los mismos temas</button>` : ""}
+      ${falladas().length ? `<button class="btn" data-act="tab" data-view="repaso">Repasar falladas (${falladas().length})</button>` : ""}
+      ${!r.fromHist ? `<button class="btn" data-act="tab" data-view="nuevo">Configurar otro test</button>` : ""}
+    </div>
+    <h2 class="sub">Corrección</h2>
+    <div class="filters"><div class="seg">${[["todas","Todas"],["fallos","Falladas y en blanco"]].map(([v,l]) => `<label><input type="radio" name="rf" value="${v}" ${S.reviewFilter===v ? "checked" : ""}><span>${l}</span></label>`).join("")}</div></div>
+    <div class="review">${list.length ? list.map(({q,i}) => rq(q,i)).join("") : `<p class="muted">Ninguna fallada. Muy bien.</p>`}</div>
+  </div>`;
+}
+function rq(q,i){
+  const r = q.resp; const blank = r === null || r < 0; const ok = !blank && r === q.correcta;
+  return `<div class="rq"><div class="head"><span class="hint">${i+1} · ${esc(temaName(temaById(q.t)))}</span><span class="pill ${ok ? "ok" : blank ? "bl" : "no"}">${ok ? "Acierto" : blank ? "En blanco" : "Fallo"}</span></div>
+    <div class="qt">${esc(q.p)}</div>
+    <ol>${q.o.map((o,k) => `<li class="${k === q.correcta ? "c" : (k === r ? "w" : "")}"><span class="l">${LETTERS[k]})</span><span>${esc(o)}${k === r ? " <b>← tu respuesta</b>" : ""}</span></li>`).join("")}</ol>
+    ${q.e ? `<div>${esc(q.e)}</div>` : ""}${q.c ? `<div class="cita">«${esc(q.c)}»</div>` : ""}</div>`;
+}
+
+/* ---------- Eventos ---------- */
+function answer(k){
+  const t = S.test; if(!t) return;
+  if(t.cfg.modo === "cada" && t.resp[t.idx] !== null) return;
+  t.resp[t.idx] = k; t.confirm = null; render();
+}
+function move(d){
+  const t = S.test; if(!t) return;
+  const j = t.idx + d; if(j < 0 || j >= t.preguntas.length) return;
+  t.idx = j; t.confirm = null; render(); scrollTo(0, 0);
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if(!el) return;
+  const act = el.dataset.act; const t = S.test;
+  switch(act){
+    case "tab": S.view = el.dataset.view; if(S.result && S.result.fromHist && S.view !== "result") S.result = null; LS.set("tt.view", S.view); render(); scrollTo(0, 0); break;
+    case "clear-err": S.err = null; render(); break;
+    case "quick": S.form.sel = [el.dataset.id]; LS.set("tt.form", S.form); S.view = "nuevo"; render(); scrollTo(0, 0); break;
+    case "sel-all": S.form.sel = temasOpo().map(x => x.id); render(); updateNuevoBits(); break;
+    case "sel-none": S.form.sel = []; render(); updateNuevoBits(); break;
+    case "start": startTest(); break;
+    case "again": if(S.lastCfg){ Object.assign(S.form, {sel: S.lastCfg.sel, n: S.lastCfg.n, dif: S.lastCfg.dif, modo: S.lastCfg.modo, penal: S.lastCfg.penal}); LS.set("tt.form", S.form); startTest(); } break;
+    case "rep-start": startRepaso(); break;
+    case "ans": answer(Number(el.dataset.k)); break;
+    case "idk": if(t){ t.resp[t.idx] = -1; render(); } break;
+    case "blank": if(t){ t.resp[t.idx] = null; render(); } break;
+    case "prev": move(-1); break;
+    case "next": move(1); break;
+    case "go": if(t){ t.idx = Number(el.dataset.k); t.confirm = null; render(); scrollTo(0, 0); } break;
+    case "finish": case "quit": if(t){ t.confirm = act; render(); const c = document.querySelector(".confirm"); if(c) c.scrollIntoView({block: "center"}); } break;
+    case "confirm-no": if(t){ t.confirm = null; render(); } break;
+    case "finish-yes": corregir(); break;
+    case "quit-yes": S.test = null; S.view = "nuevo"; render(); break;
+    case "open-res": { const r = P.res.find(x => String(x.f) === el.dataset.id); if(r){ S.result = {...r, fromHist: true}; S.reviewFilter = "todas"; S.view = "result"; render(); scrollTo(0, 0); } break; }
+  }
+});
+document.addEventListener("keydown", e => {
+  if(S.view !== "test" || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = "abcd".indexOf(e.key.toLowerCase());
+  if(k >= 0){ answer(k); e.preventDefault(); }
+  else if(e.key === "ArrowRight"){ move(1); e.preventDefault(); }
+  else if(e.key === "ArrowLeft"){ move(-1); e.preventDefault(); }
+});
+document.addEventListener("change", e => {
+  const el = e.target;
+  if(el.name === "tsel"){ const s = new Set(S.form.sel); el.checked ? s.add(el.value) : s.delete(el.value); S.form.sel = temasOpo().map(t => t.id).filter(id => s.has(id)); updateNuevoBits(); }
+  else if(el.name === "n"){ S.form.n = Number(el.value); updateNuevoBits(); }
+  else if(el.name === "dif"){ S.form.dif = el.value; updateNuevoBits(); }
+  else if(el.name === "modo"){ S.form.modo = el.value; updateNuevoBits(); }
+  else if(el.name === "penal"){ S.form.penal = Number(el.value); updateNuevoBits(); }
+  else if(el.name === "rsel"){ const s = new Set(S.rep.sel || []); el.checked ? s.add(el.value) : s.delete(el.value); S.rep.sel = [...s]; render(); }
+  else if(el.name === "rn"){ S.rep.n = Number(el.value); render(); }
+  else if(el.name === "rf"){ S.reviewFilter = el.value; render(); }
+  else if(el.id === "opoSel"){ S.opo = el.value; LS.set("tt.opo", S.opo); S.form.sel = []; S.rep.sel = null; render(); }
+});
+
+/* ---------- Arranque ---------- */
+fetch("banco.json", {cache: "no-cache"}).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); }).then(data => {
+  B = data; B.preguntas.forEach(q => QI[q.id] = q);
+  if(!B.opos.some(o => o.id === S.opo)) S.opo = B.opos[0].id;
+  render(); initSync();
+}).catch(() => { $("#main").innerHTML = `<div class="note warn">No se pudo cargar el banco de preguntas. Si has abierto el archivo directamente desde el ordenador, súbelo a GitHub Pages: el navegador no deja leer banco.json desde un archivo local.</div>`; });
+})();
+</script>
+</body>
+</html>
