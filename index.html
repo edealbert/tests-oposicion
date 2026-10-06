@@ -234,6 +234,30 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
 .sync.on i{background:var(--ok)}
 .sync.err i{background:var(--bad)}
 .avail{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);white-space:nowrap}
+/* ---- Escuchar ---- */
+.player{position:sticky;top:8px;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 18px rgb(0 0 0 / .08)}
+.player .ptitle{font-weight:800;font-size:1.02rem}
+.pctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pbtn{width:44px;height:44px;border-radius:999px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem}
+.pbtn.main{width:54px;height:54px;background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:1.35rem}
+.pbtn:hover{border-color:var(--accent)}
+.pbar{height:8px;border-radius:999px;background:var(--sunk);overflow:hidden;cursor:pointer}
+.pbar i{display:block;height:100%;background:var(--accent);width:0}
+.pinfo{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.popts{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:.88rem}
+.popts select{max-width:220px}
+.texto{display:flex;flex-direction:column;gap:2px}
+.texto p{margin:0;padding:6px 10px;border-radius:8px;line-height:1.6;cursor:pointer}
+.texto p.h{font-weight:800;margin-top:10px}
+.texto p:hover{background:var(--sunk)}
+.texto p.now{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.alist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.alist li{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.alist .ab{height:6px;border-radius:999px;background:var(--sunk);overflow:hidden;margin-top:6px}
+.alist .ab i{display:block;height:100%;background:var(--accent)}
+#mini{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgb(0 0 0 / .18);max-width:calc(100% - 24px);font-size:.88rem}
+#mini span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw;font-weight:700}
+#mini .pbtn{width:36px;height:36px;font-size:.95rem}
 </style>
 </head>
 <body>
@@ -245,9 +269,11 @@ td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
       <button data-act="tab" data-view="nuevo">Nuevo test</button>
       <button data-act="tab" data-view="repaso">Repaso<span class="badge" id="fallBadge" hidden></span></button>
       <button data-act="tab" data-view="historial">Historial</button>
+      <button data-act="tab" data-view="escuchar">Escuchar</button>
     </nav>
   </header>
   <main id="main"><p class="muted">Cargando…</p></main>
+  <div id="mini" hidden></div>
   <p class="hint" style="margin-top:40px"><span class="sync" id="sync"><i></i><span>Progreso guardado en este dispositivo</span></span></p>
 </div>
 <script src="config.js"></script>
@@ -281,7 +307,7 @@ const S = {
   form: Object.assign({sel:[], n:20, dif:"todas", penal:1/3, modo:"final"}, LS.get("tt.form", {})),
   rep: {sel:null, n:20}, test:null, result:null, reviewFilter:"todas", err:null
 };
-if(!["temario","nuevo","repaso","historial"].includes(S.view)) S.view = "temario";
+if(!["temario","nuevo","repaso","historial","escuchar"].includes(S.view)) S.view = "temario";
 
 /* ---------- Progreso (este dispositivo + sincronización opcional) ---------- */
 // P = {upd, res:[resultado], st:{idPregunta:{v:vistas, a:aciertos, r:1|0 último, u:timestamp}}}
@@ -347,6 +373,126 @@ function statsTema(id){
   return {total: qs.length, vistas, sinVer: qs.length - vistas, pct: v ? a/v*100 : null, resp: v};
 }
 
+
+/* ---------- Escuchar los temas (lectura en voz alta con la voz del navegador) ---------- */
+const SS = window.speechSynthesis;
+const A = {tx:null, loading:false, tema:LS.get("tt.audio.tema", null), pos:LS.get("tt.audio.pos", {}), rate:LS.get("tt.audio.rate", 1), voice:LS.get("tt.audio.voice", ""),
+           playing:false, chunks:[], ci:0, token:0, lock:null};
+function loadTemario(){
+  if(A.tx || A.loading) return; A.loading = true;
+  fetch("temario.json", {cache:"no-cache"}).then(r => { if(!r.ok) throw 0; return r.json(); }).then(d => { A.tx = d.temas; A.loading = false; if(S.view === "escuchar") render(); })
+    .catch(() => { A.loading = false; A.err = "No se pudo cargar el texto de los temas (temario.json)."; if(S.view === "escuchar") render(); });
+}
+const parrafos = id => (A.tx && A.tx[id]) || [];
+const voces = () => (SS ? SS.getVoices() : []).filter(v => /^es(-|_|$)/i.test(v.lang));
+if(SS) SS.onvoiceschanged = () => { if(S.view === "escuchar") audioPaint(false, true); };
+// adapta abreviaturas y siglas para que se lean bien
+function hablable(t){
+  return t.replace(/\b(\d+)\/(\d{4})\b/g, "$1 de $2")
+    .replace(/\barts?\.\s*/gi, m => /s\./i.test(m) ? "artículos " : "artículo ")
+    .replace(/\bapdo\.\s*/gi, "apartado ").replace(/\bnúm\.\s*/gi, "número ").replace(/\bCC\.?\s?AA\.?/g, "Comunidades Autónomas")
+    .replace(/\bLPAC\b/g, "Ley del Procedimiento Administrativo Común").replace(/\bLRJSP\b/g, "Ley de Régimen Jurídico del Sector Público")
+    .replace(/\bLRBRL\b/g, "Ley de Bases del Régimen Local").replace(/\bCE\b/g, "Constitución").replace(/\bTC\b/g, "Tribunal Constitucional")
+    .replace(/\bBOE\b/g, "B O E").replace(/•/g, "").replace(/\s+/g, " ").trim();
+}
+// trocea un párrafo en frases cortas (los navegadores cortan las locuciones largas)
+function trocear(t){
+  const out = []; let cur = "";
+  (t.match(/[^.;:!?]+[.;:!?]*\s*/g) || [t]).forEach(f => {
+    if((cur + f).length > 220 && cur){ out.push(cur); cur = ""; }
+    if(f.length > 220){ f.split(/,\s*/).forEach(g => { if((cur + g).length > 220 && cur){ out.push(cur); cur = ""; } cur += g + ", "; }); }
+    else cur += f;
+  });
+  if(cur.trim()) out.push(cur);
+  return out.map(x => x.trim()).filter(Boolean);
+}
+const posDe = id => A.pos[id] || 0;
+function setPos(id, i){ A.pos[id] = i; LS.set("tt.audio.pos", A.pos); }
+async function wake(on){
+  try{ if(on && !A.lock && navigator.wakeLock) A.lock = await navigator.wakeLock.request("screen");
+       if(!on && A.lock){ await A.lock.release(); A.lock = null; } }catch(e){}
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && A.playing) wake(true); });
+function speakFrom(pi, ci){
+  if(!SS) return;
+  const ps = parrafos(A.tema); if(!ps.length) return;
+  if(pi >= ps.length){ stopAudio(); setPos(A.tema, 0); audioPaint(); return; }
+  A.token++; const tok = A.token;
+  SS.cancel();
+  setPos(A.tema, pi);
+  A.chunks = trocear(hablable(ps[pi].x)); A.ci = ci || 0; A.playing = true; A.started = true; wake(true);
+  const next = () => {
+    if(tok !== A.token || !A.playing) return;
+    if(A.ci >= A.chunks.length){ speakFrom(posDe(A.tema) + 1, 0); return; }
+    const u = new SpeechSynthesisUtterance(A.chunks[A.ci]);
+    u.lang = "es-ES"; u.rate = A.rate;
+    const v = voces().find(v => v.voiceURI === A.voice) || voces().find(v => /es-ES/i.test(v.lang)) || voces()[0];
+    if(v) u.voice = v;
+    u.onend = () => { if(tok !== A.token) return; A.ci++; next(); };
+    u.onerror = e => { if(tok !== A.token) return; if(e.error === "interrupted" || e.error === "canceled") return; A.ci++; next(); };
+    SS.speak(u);
+  };
+  next(); audioPaint();
+}
+function pauseAudio(){ A.playing = false; A.token++; if(SS) SS.cancel(); wake(false); audioPaint(); }
+function stopAudio(){ pauseAudio(); A.ci = 0; }
+function playAudio(){ if(A.playing) return; speakFrom(posDe(A.tema), A.ci); }
+function minsLeft(id, from){ const ps = parrafos(id); let c = 0; for(let i = from; i < ps.length; i++) c += ps[i].x.length; return Math.max(1, Math.round(c / (900 * A.rate))); }
+
+function vEscuchar(){
+  if(!SS) return `<div class="stack"><section class="intro"><h1>Escuchar</h1></section><div class="note warn">Este navegador no puede leer en voz alta. Prueba con Chrome, Edge o Safari actualizados.</div></div>`;
+  if(!A.tx){ loadTemario(); return `<div class="stack"><section class="intro"><h1>Escuchar</h1></section>${A.err ? `<div class="note warn">${esc(A.err)}</div>` : `<p class="muted">Cargando los temas…</p>`}</div>`; }
+  const ts = temasOpo().filter(t => parrafos(t.id).length);
+  const lista = `<ol class="alist">${ts.map(t => { const n = parrafos(t.id).length, p = posDe(t.id), pct = Math.round(p / n * 100);
+    return `<li><span class="num">${esc(t.numero)}</span><div><div class="ttl">${esc(t.titulo)}</div><div class="meta">${n} párrafos · unos ${minsLeft(t.id, 0)} min${p ? " · vas por el " + pct + "%" : ""}</div><div class="ab"><i style="width:${pct}%"></i></div></div><button class="btn sm ${t.id === A.tema ? "primary" : ""}" data-act="a-open" data-id="${t.id}">${t.id === A.tema ? "Abierto" : (p ? "Continuar" : "Escuchar")}</button></li>`; }).join("")}</ol>`;
+  if(!A.tema || !parrafos(A.tema).length) return `<div class="stack"><section class="intro"><h1>Escuchar</h1><p>Elige un tema y el móvil o el ordenador te lo lee en voz alta. Recuerda por dónde ibas en cada tema.</p></section>${lista}</div>`;
+  const t = temaById(A.tema), ps = parrafos(A.tema);
+  const vs = voces();
+  return `<div class="stack">
+    <section class="intro"><h1>Escuchar</h1></section>
+    <div class="player" id="player">
+      <div class="ptitle">${esc(temaName(t))}</div>
+      <div class="pctrl">
+        <button class="pbtn" data-act="a-prev" aria-label="Párrafo anterior">⏮</button>
+        <button class="pbtn" data-act="a-back" aria-label="Retroceder un trozo">↺</button>
+        <button class="pbtn main" id="aPlay" data-act="a-toggle" aria-label="Reproducir">▶</button>
+        <button class="pbtn" data-act="a-next" aria-label="Párrafo siguiente">⏭</button>
+        <button class="pbtn" data-act="a-stop" aria-label="Volver al principio">⏹</button>
+      </div>
+      <div class="pbar" id="aBar" title="Toca para saltar"><i></i></div>
+      <div class="pinfo"><span id="aPos"></span><span id="aLeft"></span></div>
+      <div class="popts">
+        <label>Velocidad <select id="aRate">${[0.8,0.9,1,1.1,1.25,1.5,1.75,2].map(r => `<option value="${r}" ${r === A.rate ? "selected" : ""}>${String(r).replace(".", ",")}×</option>`).join("")}</select></label>
+        <label>Voz <select id="aVoice">${vs.length ? vs.map(v => `<option value="${esc(v.voiceURI)}" ${v.voiceURI === A.voice ? "selected" : ""}>${esc(v.name)}</option>`).join("") : `<option value="">Voz del sistema</option>`}</select></label>
+        <button class="link" data-act="a-list">Cambiar de tema</button>
+      </div>
+    </div>
+    <p class="hint">Toca cualquier párrafo para empezar a escuchar desde ahí. Mientras suena, la pantalla se mantiene encendida: si la bloqueas, el móvil puede parar la lectura.</p>
+    <div class="texto" id="aText">${ps.map((p, i) => `<p data-act="a-jump" data-i="${i}" class="${p.h ? "h" : ""}">${esc(p.x)}</p>`).join("")}</div>
+  </div>`;
+}
+function audioPaint(scroll, voicesOnly){
+  if(S.view === "escuchar"){
+    if(voicesOnly){ const sel = $("#aVoice"); if(sel && !voces().some(v => sel.querySelector(`option[value="${CSS.escape(v.voiceURI)}"]`))) render(); return; }
+    const ps = parrafos(A.tema), i = posDe(A.tema);
+    const pb = $("#aPlay"); if(pb){ pb.textContent = A.playing ? "⏸" : "▶"; pb.setAttribute("aria-label", A.playing ? "Pausa" : "Reproducir"); }
+    const bar = $("#aBar i"); if(bar && ps.length) bar.style.width = (i / ps.length * 100) + "%";
+    const ap = $("#aPos"); if(ap) ap.textContent = ps.length ? `Párrafo ${i + 1} de ${ps.length}` : "";
+    const al = $("#aLeft"); if(al && ps.length) al.textContent = `quedan unos ${minsLeft(A.tema, i)} min`;
+    document.querySelectorAll("#aText p.now").forEach(p => p.classList.remove("now"));
+    const cur = document.querySelector(`#aText p[data-i="${i}"]`);
+    if(cur){ cur.classList.add("now"); if(scroll || A.playing){ const r = cur.getBoundingClientRect(), ph = ($("#player") || {}).offsetHeight || 0; if(r.top < ph + 20 || r.bottom > innerHeight - 70) cur.scrollIntoView({block: "center", behavior: scroll ? "auto" : "smooth"}); } }
+  }
+  miniPaint();
+}
+function miniPaint(){
+  const m = $("#mini"); if(!m) return;
+  const show = A.tema && A.started && S.view !== "escuchar" && S.view !== "test" && A.tx;
+  m.hidden = !show; if(!show) return;
+  const t = temaById(A.tema);
+  m.innerHTML = `<span>🎧 ${esc(t ? t.titulo : "")}</span><button class="pbtn" data-act="a-toggle" aria-label="${A.playing ? "Pausa" : "Reproducir"}">${A.playing ? "⏸" : "▶"}</button><button class="pbtn" data-act="tab" data-view="escuchar" aria-label="Abrir el reproductor">↗</button>`;
+}
+
 /* ---------- Render ---------- */
 function render(){
   const inTest = S.view === "test";
@@ -356,8 +502,10 @@ function render(){
   if(B.opos.length > 1) ob.innerHTML = `<select id="opoSel" aria-label="Oposición">${B.opos.map(o => `<option value="${o.id}" ${o.id === S.opo ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}</select>`;
   else ob.textContent = "· " + B.opos[0].nombre;
   const nf = falladas().length; const fb = $("#fallBadge"); fb.hidden = !nf; fb.textContent = nf;
-  const V = {temario:vTemario, nuevo:vNuevo, repaso:vRepaso, historial:vHistorial, test:vTest, result:vResult};
+  const V = {temario:vTemario, nuevo:vNuevo, repaso:vRepaso, historial:vHistorial, test:vTest, result:vResult, escuchar:vEscuchar};
   $("#main").innerHTML = (V[S.view] || vTemario)();
+  if(S.view === "escuchar") audioPaint(true);
+  miniPaint();
 }
 const notes = () => S.err ? `<div class="note warn">${esc(S.err)} <button class="link" data-act="clear-err">Cerrar</button></div>` : "";
 
@@ -367,7 +515,7 @@ function vTemario(){
     const meta = [s.total + " preguntas", s.sinVer + " sin ver"];
     if(s.pct !== null) meta.push(Math.round(s.pct) + "% de acierto");
     if(nf) meta.push(nf + " para repasar");
-    return `<li class="tema"><span class="num">${esc(t.numero)}</span><div class="tinfo"><div class="ttl">${esc(t.titulo)}</div>${t.epigrafe ? `<div class="epi">${esc(t.epigrafe)}</div>` : ""}<div class="meta">${meta.join(" · ")}</div></div><div class="tact"><button class="btn sm" data-act="quick" data-id="${t.id}">Test de este tema</button></div></li>`;
+    return `<li class="tema"><span class="num">${esc(t.numero)}</span><div class="tinfo"><div class="ttl">${esc(t.titulo)}</div>${t.epigrafe ? `<div class="epi">${esc(t.epigrafe)}</div>` : ""}<div class="meta">${meta.join(" · ")}</div></div><div class="tact"><button class="btn sm" data-act="quick" data-id="${t.id}">Test de este tema</button> <button class="btn sm" data-act="a-open" data-id="${t.id}">Escuchar</button></div></li>`;
   }).join("");
   return `<div class="stack">
     <section class="intro"><h1>Temario</h1><p>Elige un tema para hacer un test rápido, o ve a «Nuevo test» para mezclar varios temas.</p></section>
@@ -626,6 +774,14 @@ document.addEventListener("click", e => {
   switch(act){
     case "tab": S.view = el.dataset.view; if(S.result && S.result.fromHist && S.view !== "result") S.result = null; LS.set("tt.view", S.view); render(); scrollTo(0, 0); break;
     case "clear-err": S.err = null; render(); break;
+    case "a-open": if(A.tema !== el.dataset.id){ stopAudio(); A.tema = el.dataset.id; LS.set("tt.audio.tema", A.tema); } S.view = "escuchar"; LS.set("tt.view", S.view); render(); break;
+    case "a-list": stopAudio(); A.started = false; A.tema = null; LS.set("tt.audio.tema", null); render(); scrollTo(0, 0); break;
+    case "a-toggle": A.playing ? pauseAudio() : playAudio(); break;
+    case "a-stop": stopAudio(); setPos(A.tema, 0); audioPaint(true); break;
+    case "a-prev": { const i = Math.max(0, posDe(A.tema) - 1); if(A.playing) speakFrom(i, 0); else { A.ci = 0; setPos(A.tema, i); audioPaint(true); } break; }
+    case "a-next": { const i = Math.min(parrafos(A.tema).length - 1, posDe(A.tema) + 1); if(A.playing) speakFrom(i, 0); else { A.ci = 0; setPos(A.tema, i); audioPaint(true); } break; }
+    case "a-back": if(A.playing) speakFrom(posDe(A.tema), Math.max(0, A.ci - 1)); else { A.ci = Math.max(0, A.ci - 1); } break;
+    case "a-jump": speakFrom(Number(el.dataset.i), 0); break;
     case "quick": S.form.sel = [el.dataset.id]; LS.set("tt.form", S.form); S.view = "nuevo"; render(); scrollTo(0, 0); break;
     case "sel-all": S.form.sel = temasOpo().map(x => x.id); render(); updateNuevoBits(); break;
     case "sel-none": S.form.sel = []; render(); updateNuevoBits(); break;
@@ -645,7 +801,14 @@ document.addEventListener("click", e => {
     case "open-res": { const r = P.res.find(x => String(x.f) === el.dataset.id); if(r){ S.result = {...r, fromHist: true}; S.reviewFilter = "todas"; S.view = "result"; render(); scrollTo(0, 0); } break; }
   }
 });
+document.addEventListener("click", e => {
+  const b = e.target.closest("#aBar"); if(!b) return;
+  const r = b.getBoundingClientRect(), n = parrafos(A.tema).length; if(!n) return;
+  const i = Math.min(n - 1, Math.floor((e.clientX - r.left) / r.width * n));
+  if(A.playing) speakFrom(i, 0); else { A.ci = 0; setPos(A.tema, i); audioPaint(true); }
+});
 document.addEventListener("keydown", e => {
+  if(S.view === "escuchar" && e.key === " " && !/^(INPUT|SELECT|BUTTON|TEXTAREA)$/.test(document.activeElement.tagName)){ A.playing ? pauseAudio() : playAudio(); e.preventDefault(); return; }
   if(S.view !== "test" || e.metaKey || e.ctrlKey || e.altKey) return;
   const k = "abcd".indexOf(e.key.toLowerCase());
   if(k >= 0){ answer(k); e.preventDefault(); }
@@ -662,6 +825,8 @@ document.addEventListener("change", e => {
   else if(el.name === "rsel"){ const s = new Set(S.rep.sel || []); el.checked ? s.add(el.value) : s.delete(el.value); S.rep.sel = [...s]; render(); }
   else if(el.name === "rn"){ S.rep.n = Number(el.value); render(); }
   else if(el.name === "rf"){ S.reviewFilter = el.value; render(); }
+  else if(el.id === "aRate"){ A.rate = Number(el.value); LS.set("tt.audio.rate", A.rate); if(A.playing) speakFrom(posDe(A.tema), A.ci); else audioPaint(); }
+  else if(el.id === "aVoice"){ A.voice = el.value; LS.set("tt.audio.voice", A.voice); if(A.playing) speakFrom(posDe(A.tema), A.ci); }
   else if(el.id === "opoSel"){ S.opo = el.value; LS.set("tt.opo", S.opo); S.form.sel = []; S.rep.sel = null; render(); }
 });
 
