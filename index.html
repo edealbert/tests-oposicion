@@ -392,7 +392,7 @@ function hablable(t){
     .replace(/\barts?\.\s*/gi, m => /s\./i.test(m) ? "artículos " : "artículo ")
     .replace(/\bapdo\.\s*/gi, "apartado ").replace(/\bnúm\.\s*/gi, "número ").replace(/\bCC\.?\s?AA\.?/g, "Comunidades Autónomas")
     .replace(/\bLPAC\b/g, "Ley del Procedimiento Administrativo Común").replace(/\bLRJSP\b/g, "Ley de Régimen Jurídico del Sector Público")
-    .replace(/\bLRBRL\b/g, "Ley de Bases del Régimen Local").replace(/\bCE\b/g, "Constitución").replace(/\bTC\b/g, "Tribunal Constitucional")
+    .replace(/\bLRBRL\b/g, "Ley de Bases del Régimen Local").replace(/\bLBRL\b/g, "Ley de Bases del Régimen Local").replace(/\bTRLRHL\b/g, "Texto Refundido de la Ley Reguladora de las Haciendas Locales").replace(/\bIIVTNU\b/g, "plusvalía municipal").replace(/\bIRPF\b/g, "I R P F").replace(/\bIAE\b/g, "I A E").replace(/\bIVTM\b/g, "I V T M").replace(/\bICIO\b/g, "I C I O").replace(/\bIBI\b/g, "I B I").replace(/\bSTC\b/g, "sentencia del Tribunal Constitucional").replace(/\bTASA =/g, "Tasa igual a").replace(/\bPRECIO PÚBLICO =/g, "Precio público igual a").replace(/\bCE\b/g, "Constitución").replace(/\bTC\b/g, "Tribunal Constitucional")
     .replace(/\bBOE\b/g, "B O E").replace(/•/g, "").replace(/\s+/g, " ").trim();
 }
 // trocea un párrafo en frases cortas (los navegadores cortan las locuciones largas)
@@ -515,7 +515,7 @@ function vTemario(){
     const meta = [s.total + " preguntas", s.sinVer + " sin ver"];
     if(s.pct !== null) meta.push(Math.round(s.pct) + "% de acierto");
     if(nf) meta.push(nf + " para repasar");
-    return `<li class="tema"><span class="num">${esc(t.numero)}</span><div class="tinfo"><div class="ttl">${esc(t.titulo)}</div>${t.epigrafe ? `<div class="epi">${esc(t.epigrafe)}</div>` : ""}<div class="meta">${meta.join(" · ")}</div></div><div class="tact"><button class="btn sm" data-act="quick" data-id="${t.id}">Test de este tema</button> <button class="btn sm" data-act="a-open" data-id="${t.id}">Escuchar</button></div></li>`;
+    return `<li class="tema"><span class="num">${esc(t.numero)}</span><div class="tinfo"><div class="ttl">${esc(t.titulo)}</div>${t.epigrafe ? `<div class="epi">${esc(t.epigrafe)}</div>` : ""}<div class="meta">${meta.join(" · ")}</div></div><div class="tact"><button class="btn sm" data-act="quick" data-id="${t.id}">Test de este tema</button>${t.texto === false ? "" : ` <button class="btn sm" data-act="a-open" data-id="${t.id}">Escuchar</button>`}</div></li>`;
   }).join("");
   return `<div class="stack">
     <section class="intro"><h1>Temario</h1><p>Elige un tema para hacer un test rápido, o ve a «Nuevo test» para mezclar varios temas.</p></section>
