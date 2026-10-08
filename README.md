@@ -1,6 +1,6 @@
 # Tests del Temario
 
-Web para practicar tests de oposición. Ahora mismo incluye la oposición de **Benicàssim · Auxiliar Administrativo**, con 1.144 preguntas de 9 temas.
+Web para practicar tests de oposición. Ahora mismo incluye la oposición de **Benicàssim · Auxiliar Administrativo**, con 1.294 preguntas de 9 temas.
 
 ## Archivos
 
