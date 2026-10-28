@@ -1,6 +1,6 @@
 # Tests del Temario
 
-Web para practicar tests de oposición. Ahora mismo incluye la oposición de **Benicàssim · Auxiliar Administrativo**, con 1.408 preguntas de 10 temas.
+Web para practicar tests de oposición. Ahora mismo incluye la oposición de **Benicàssim · Auxiliar Administrativo**, con 1.832 preguntas de 12 temas.
 
 ## Archivos
 
@@ -8,6 +8,7 @@ Web para practicar tests de oposición. Ahora mismo incluye la oposición de **B
 |---|---|
 | `index.html` | La web |
 | `banco.json` | Temas y preguntas |
+| `temario.json` | Texto de los temas para el apartado «Escuchar» |
 | `config.js` | Configuración de la sincronización (opcional) |
 | `supabase.sql` | Crea la tabla en Supabase (solo si usas la sincronización) |
 
@@ -46,3 +47,12 @@ Ten en cuenta dos cosas:
 ## Añadir temas o preguntas
 
 Se cambia el archivo `banco.json`. Para actualizarlo, en GitHub pulsa **Add file**, luego **Upload files**, sube el nuevo `banco.json` y pulsa **Commit changes**. El progreso no se pierde, porque cada pregunta tiene un identificador fijo.
+
+
+## Actualización del 28/10/2026
+
+- Tema I.1: añadida la parte 2 (Ley Orgánica 3/2007 de igualdad). Tiene 106 preguntas nuevas (I1-169 a I1-274) y su texto en «Escuchar».
+- Tema I.7 nuevo: el personal al servicio de las Entidades Locales (TREBEP). Tiene 198 preguntas (I7-001 a I7-198) y su texto, con los cuadros de carrera, evaluación y permisos pasados a texto.
+- Tema I.10 nuevo: Prevención de Riesgos Laborales. Tiene 120 preguntas (I10-001 a I10-120) y su texto.
+
+Para actualizar la web, sube a GitHub `banco.json` y `temario.json` (Add file → Upload files → Commit changes). No hace falta tocar `index.html` ni `config.js`.
